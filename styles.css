@@ -1,0 +1,8 @@
+#canvas {
+  position: absolute;
+
+  width: 640px;
+  height: 400px;
+
+  background-color: grey;
+}
