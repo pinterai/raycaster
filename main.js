@@ -28,7 +28,7 @@ const grid = [
     [1, 0, 0, 0, 0, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1]
-  ]
+]
 
 // angle, x effect, y effect
   let template = [ 
@@ -82,30 +82,72 @@ function draw_ray(pa, px, py, grid) {
   let ox;
   let oy;
 
+  let Xdx; // ratio of change in X when vertical wall is hit
+  let Xdy; // ratio of change in Y when vertical wall is hit
+  let Xdh; // hypotenuse of dx, dy when vertical wall is hit
+
+  let Ydx; // ratio of change in X when horizontal wall is hit
+  let Ydy; // ratio of change in Y when horizontal wall is hit
+  let Ydh; // hypotenuse of dx, dy when horizontal wall is hit
+
+  let multiplier;
+
   // upwards
   if (dy < 0) {
     ox = px+5; // catchup x
     oy = py+5; // catchup y
-    while (true) {
-      dy = Math.abs(dy);
+    for (let i = 0; i < 100; i++) {
 
       if (ox == px + 5 && oy == py + 5) { // first hit treated differently
-        ry = (Math.floor(oy / 45) * 45);
+        Xdx = Math.abs(ox - Math.floor(ox / 45) * 45);
+        Ydy = Math.abs(oy - Math.floor(oy / 45) * 45);
       } else {
-        ry = (Math.floor(oy / 45) * 45) - 45;
+
+        if (dx < 0) { // left side hit
+          Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45) - 45);
+        } else { // right side hit
+          Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45) + 45);
+        }
+
+        Ydy = Math.abs(oy - (Math.floor(oy / 45) * 45) - 45);
       }
 
-      let dy_ratio = oy - ry; // length of traingle y
-      let multiplier = dy_ratio / dy;
-      let dx_ratio = dx * multiplier; // length of triangle x
+      // if vertical wall is hit
+      multiplier = Xdx / Math.abs(dx);
+      Xdy = Math.abs(dy) * multiplier;
+      Xdh = Math.sqrt((Xdx ** 2) + (Xdy ** 2)); // pythagoras
 
-      rx = ox + dx_ratio;
+      // if horizontal wall is hit
+      multiplier = Ydy / Math.abs(dy);
+      Ydx = Math.abs(dx) * multiplier;
+      Ydh = Math.sqrt((Ydx ** 2) + (Ydy ** 2)); // pythagoras
+
+      if (Ydh < Xdh) { // we take horizontal wall hit
+
+        if (dx < 0) { // left side hit
+          rx = ox - Ydx;
+        } else { // right side hit
+          rx = ox + Ydx;
+        }
+        ry = oy - Ydy;
+      } else if (Xdh < Ydh) { // we have vertical wall hit
+        if (dx < 0) { // left side hit
+          rx = ox - Xdx;
+        } else { // right side hit
+          rx = ox + Xdx;
+        }
+        ry = oy - Xdy;
+      }
 
       if (
-        grid[Math.floor(ry / 45)][Math.floor(rx / 45)] >= 0 &&
-        grid[Math.floor(ry / 45)][Math.floor(rx / 45)] <= 8
+        Math.floor(ry / 45) - 1 >= 0 &&
+        Math.floor(rx / 45) - 1 >= 0 &&
+        Math.floor(ry / 45) - 1 <= 7 &&
+        Math.floor(rx / 45) - 1 <= 7
+        // grid[Math.floor(ry / 45)][Math.floor(rx / 45)] >= 0 &&
+        // grid[Math.floor(ry / 45)][Math.floor(rx / 45)] <= 8
       ) {
-        check_square = grid[Math.floor(ry / 45)-1][Math.floor(rx / 45)];
+        check_square = grid[Math.floor(ry / 45) - 1][Math.floor(rx / 45)];
         if (check_square == 1) { // next grid square is a wall
           break
         }
@@ -118,16 +160,6 @@ function draw_ray(pa, px, py, grid) {
     }
   }
 
-
-    // downwards
-    // if (dy > 0) {
-      //dy = Math.abs(dy);
-      //dx = Math.abs(dx);
-    //} 
-
-
-  //console.log(Math.floor(ry / 45));
-  //console.log(Math.floor(Math.abs(rx) / 45));
   pen.beginPath();
   pen.strokeStyle = "red";
   pen.moveTo(px+5, py+5);
@@ -215,8 +247,8 @@ function game_loop() {
   pen.clearRect(0, 0, canvas.width, canvas.height);
   draw_scene_2d();
   draw_player_2d();
-  draw_ray(pa, px, py, grid)
-  let [dx, dy] = get_direction(pa);
+  draw_ray(pa, px, py, grid);
+  // let [dx, dy] = get_direction(pa);
   //draw_rays(dx, dy, px, py)
   requestAnimationFrame(game_loop);
 }
