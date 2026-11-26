@@ -92,24 +92,32 @@ function draw_ray(pa, px, py, grid) {
 
   let multiplier;
 
+  let xgrid;
+  let ygrid;
+
   // upwards
   if (dy < 0) {
     ox = px+5; // catchup x
     oy = py+5; // catchup y
-    for (let i = 0; i < 100; i++) {
+    while (true) {
 
       if (ox == px + 5 && oy == py + 5) { // first hit treated differently
-        Xdx = Math.abs(ox - Math.floor(ox / 45) * 45);
+        if (dx < 0) { // left side hit
+          Xdx = Math.abs(ox - Math.floor(ox / 45) * 45);
+        } else { // right side hit
+          Xdx = Math.abs(ox - Math.ceil(ox / 45) * 45);
+        }
         Ydy = Math.abs(oy - Math.floor(oy / 45) * 45);
       } else {
-
         if (dx < 0) { // left side hit
-          Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45) - 45);
+          Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45));
         } else { // right side hit
-          Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45) + 45);
+          Xdx = Math.abs(ox - (Math.ceil(ox / 45) * 45));
         }
+        Ydy = Math.abs(oy - (Math.floor(oy / 45) * 45));
 
-        Ydy = Math.abs(oy - (Math.floor(oy / 45) * 45) - 45);
+        if (Xdx == 0) {Xdx = 45};
+        if (Ydy == 0) {Ydy = 45};
       }
 
       // if vertical wall is hit
@@ -123,31 +131,41 @@ function draw_ray(pa, px, py, grid) {
       Ydh = Math.sqrt((Ydx ** 2) + (Ydy ** 2)); // pythagoras
 
       if (Ydh < Xdh) { // we take horizontal wall hit
-
         if (dx < 0) { // left side hit
           rx = ox - Ydx;
+
+          xgrid = Math.floor(rx / 45);
         } else { // right side hit
           rx = ox + Ydx;
+
+          xgrid = Math.floor(rx / 45); 
         }
         ry = oy - Ydy;
-      } else if (Xdh < Ydh) { // we have vertical wall hit
+
+        ygrid = Math.floor(ry / 45) - 1;
+
+      } else if (Xdh < Ydh) { // we have vertical wall hit       ALL GOOD
         if (dx < 0) { // left side hit
           rx = ox - Xdx;
+
+          xgrid = Math.floor(rx / 45) - 1;
         } else { // right side hit
           rx = ox + Xdx;
+
+          xgrid = Math.ceil(rx / 45);
         }
         ry = oy - Xdy;
+
+        ygrid = Math.floor(ry / 45);
       }
 
       if (
-        Math.floor(ry / 45) - 1 >= 0 &&
-        Math.floor(rx / 45) - 1 >= 0 &&
-        Math.floor(ry / 45) - 1 <= 7 &&
-        Math.floor(rx / 45) - 1 <= 7
-        // grid[Math.floor(ry / 45)][Math.floor(rx / 45)] >= 0 &&
-        // grid[Math.floor(ry / 45)][Math.floor(rx / 45)] <= 8
+        ygrid >= 1 &&
+        xgrid >= 1 &&
+        ygrid <= 7 &&
+        xgrid <= 7
       ) {
-        check_square = grid[Math.floor(ry / 45) - 1][Math.floor(rx / 45)];
+        check_square = grid[ygrid][xgrid];
         if (check_square == 1) { // next grid square is a wall
           break
         }
