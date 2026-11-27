@@ -96,93 +96,116 @@ function draw_ray(pa, px, py, grid) {
   let ygrid;
 
   // upwards
-  if (dy < 0) {
-    ox = px+5; // catchup x
-    oy = py+5; // catchup y
-    while (true) {
+  //if (dy < 0) {
+  ox = px+5; // catchup x
+  oy = py+5; // catchup y
+  while (true) {
 
-      if (ox == px + 5 && oy == py + 5) { // first hit treated differently
-        if (dx < 0) { // left side hit
-          Xdx = Math.abs(ox - Math.floor(ox / 45) * 45);
-        } else { // right side hit
-          Xdx = Math.abs(ox - Math.ceil(ox / 45) * 45);
-        }
-        Ydy = Math.abs(oy - Math.floor(oy / 45) * 45);
+    if (ox == px + 5 && oy == py + 5) { // first hit treated differently
+      if (dx < 0) { // left side hit
+        Xdx = Math.abs(ox - Math.floor(ox / 45) * 45);
+      } else { // right side hit
+        Xdx = Math.abs(ox - Math.ceil(ox / 45) * 45);
+      }
+      if (dy < 0) {
+        Ydy = Math.abs(oy - Math.floor(oy / 45) * 45); // upwards
       } else {
-        if (dx < 0) { // left side hit
-          Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45));
-        } else { // right side hit
-          Xdx = Math.abs(ox - (Math.ceil(ox / 45) * 45));
-        }
-        Ydy = Math.abs(oy - (Math.floor(oy / 45) * 45));
-
-        if (Xdx == 0) {Xdx = 45};
-        if (Ydy == 0) {Ydy = 45};
+        Ydy = Math.abs(oy - Math.ceil(oy / 45) * 45); // downwards
+      }
+    } else {
+      if (dx < 0) { // left side hit
+        Xdx = Math.abs(ox - (Math.floor(ox / 45) * 45));
+      } else { // right side hit
+        Xdx = Math.abs(ox - (Math.ceil(ox / 45) * 45));
+      }
+      if (dy < 0) {
+        Ydy = Math.abs(oy - Math.floor(oy / 45) * 45); // upwards
+      } else {
+        Ydy = Math.abs(oy - Math.ceil(oy / 45) * 45); // downwards
       }
 
-      // if vertical wall is hit
-      multiplier = Xdx / Math.abs(dx);
-      Xdy = Math.abs(dy) * multiplier;
-      Xdh = Math.sqrt((Xdx ** 2) + (Xdy ** 2)); // pythagoras
+      if (Xdx == 0) {Xdx = 45};
+      if (Ydy == 0) {Ydy = 45};
+    }
 
-      // if horizontal wall is hit
-      multiplier = Ydy / Math.abs(dy);
-      Ydx = Math.abs(dx) * multiplier;
-      Ydh = Math.sqrt((Ydx ** 2) + (Ydy ** 2)); // pythagoras
+    // if vertical wall is hit
+    multiplier = Xdx / Math.abs(dx);
+    Xdy = Math.abs(dy) * multiplier;
+    Xdh = Math.sqrt((Xdx ** 2) + (Xdy ** 2)); // pythagoras
 
-      if (Ydh < Xdh) { // we take horizontal wall hit
-        if (dx < 0) { // left side hit
-          rx = ox - Ydx;
+    // if horizontal wall is hit
+    multiplier = Ydy / Math.abs(dy);
+    Ydx = Math.abs(dx) * multiplier;
+    Ydh = Math.sqrt((Ydx ** 2) + (Ydy ** 2)); // pythagoras
 
-          xgrid = Math.floor(rx / 45);
-        } else { // right side hit
-          rx = ox + Ydx;
+    if (Ydh < Xdh) { // we take horizontal wall hit
+      if (dx < 0) { // left side hit
+        rx = ox - Ydx;
 
-          xgrid = Math.floor(rx / 45); 
-        }
+        xgrid = Math.floor(rx / 45);
+      } else { // right side hit
+        rx = ox + Ydx;
+
+        xgrid = Math.floor(rx / 45); 
+      }
+      if (dy < 0) {
         ry = oy - Ydy;
-
-        ygrid = Math.floor(ry / 45) - 1;
-
-      } else if (Xdh < Ydh) { // we have vertical wall hit       ALL GOOD
-        if (dx < 0) { // left side hit
-          rx = ox - Xdx;
-
-          xgrid = Math.floor(rx / 45) - 1;
-        } else { // right side hit
-          rx = ox + Xdx;
-
-          xgrid = Math.ceil(rx / 45);
-        }
-        ry = oy - Xdy;
-
-        ygrid = Math.floor(ry / 45);
+      } else {
+        ry = oy + Ydy;
       }
 
-      if (
-        ygrid >= 1 &&
-        xgrid >= 1 &&
-        ygrid <= 7 &&
-        xgrid <= 7
-      ) {
-        check_square = grid[ygrid][xgrid];
-        if (check_square == 1) { // next grid square is a wall
-          break
-        }
+      if (dy < 0) {
+        ygrid = Math.floor(ry / 45) - 1; // upwards
       } else {
+        ygrid = Math.ceil(ry / 45); // downwards
+      }
+
+    } else if (Xdh < Ydh) { // we have vertical wall hit
+      if (dx < 0) { // left side hit
+        rx = ox - Xdx;
+
+        xgrid = Math.floor(rx / 45) - 1;
+      } else { // right side hit
+        rx = ox + Xdx;
+
+        xgrid = Math.ceil(rx / 45);
+      }
+      if (dy < 0) {
+        ry = oy - Xdy;
+      } else {
+        ry = oy + Xdy;
+      }
+
+      ygrid = Math.floor(ry / 45);
+    }
+
+    if (
+      ygrid >= 1 &&
+      xgrid >= 1 &&
+      ygrid <= 7 &&
+      xgrid <= 7
+    ) {
+      check_square = grid[ygrid][xgrid];
+      if (check_square == 1) { // next grid square is a wall
         break
       }
-
-      ox = rx;
-      oy = ry;
+    } else {
+      break
     }
+
+    ox = rx;
+    oy = ry;
   }
+  //} else { // downwards
+    
+  //}
 
   pen.beginPath();
   pen.strokeStyle = "red";
   pen.moveTo(px+5, py+5);
   pen.lineTo(rx, ry);
   pen.stroke();
+
 }
 
 
