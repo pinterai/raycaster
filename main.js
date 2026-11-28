@@ -196,9 +196,6 @@ function draw_ray(pa, px, py, grid) {
     ox = rx;
     oy = ry;
   }
-  //} else { // downwards
-    
-  //}
 
   pen.beginPath();
   pen.strokeStyle = "red";
@@ -206,9 +203,8 @@ function draw_ray(pa, px, py, grid) {
   pen.lineTo(rx, ry);
   pen.stroke();
 
+  return Math.max(Xdh, Ydh);
 }
-
-
 
 function radian_converter(angle, hypotenuse) { // gets the 
   real_angle = angle * Math.PI / 180;
@@ -240,57 +236,14 @@ function get_direction(pa) {
   return [dx, dy]
 }
 
-function draw_rays(dx, dy, px, py) {
-  let ox = px+5; // line's starting x y coords, updates to end each round
-  let oy = py+5;
-
-  let ry; // moved x y coordinates, where the line ends
-  let rx;
-
-  let ratio_dy; // the dy scaled to current triangle
-  let ratio_dx;
-
-
-  if (Math.sin(pa* Math.PI / 180) < 0) { //going upwards
-    while (true) {
-      let playerX_square = Math.floor(ox / 45);
-      let playerY_square = Math.floor(oy / 45);
-
-      let subtractX = playerX_square * 45;
-      let subtractY = playerY_square * 45;
-
-      ratio_dy = oy - subtractY;
-      let multiplier = ratio_dy/dy
-      ratio_dx = (multiplier*dx);
-
-      rx = ox-ratio_dx;
-      ry = oy-ratio_dy;
-
-      ox = rx - 90;
-      oy = ry - 45;
-
-      let next_squareX = Math.floor(ox / 45);
-      let next_squareY = playerY_square - 1;
-
-      if (grid[next_squareY][next_squareX] == 1) {
-          break
-      }
-    }
-    pen.beginPath();
-    pen.strokeStyle = "yellow";
-    pen.moveTo(px+5, py+5);
-    pen.lineTo(rx, ry);
-    pen.stroke();
-  }
-}
-
 function game_loop() {
   pen.clearRect(0, 0, canvas.width, canvas.height);
   draw_scene_2d();
   draw_player_2d();
-  draw_ray(pa, px, py, grid);
-  // let [dx, dy] = get_direction(pa);
-  //draw_rays(dx, dy, px, py)
+
+  for (angle = pa - 30; angle < pa + 30; angle ++) {
+    draw_ray(angle, px, py, grid);
+  }
   requestAnimationFrame(game_loop);
 }
 
@@ -312,13 +265,13 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "a") {
       if (pa <= 10) {
         pa = 360-previous
-        previous += 10
+        previous += 5
       } else {
-        pa -= 10
+        pa -= 5
       }
     }
     if (e.key === "d") {
-      pa += 10;
+      pa += 5;
     }
 })
 game_loop()
